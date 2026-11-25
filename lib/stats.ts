@@ -56,8 +56,17 @@ export function computeStats(prospects: Prospect[], settings: Settings) {
     .sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!))
     .slice(0, 4);
 
+  const overdueCount = followUps.filter((p) => p.next_follow_up! < today).length;
+  const revenue12m = months.reduce((s, m) => s + m.revenue, 0);
+  const deals12m = months.reduce((s, m) => s + m.deals, 0);
+  const avgDeal = won.length ? sum(won) / won.length : null;
+
   return {
     today,
+    overdueCount,
+    revenue12m,
+    deals12m,
+    avgDeal,
     total: prospects.length,
     active: open.length,
     callsThisWeek: callsThisWeek.length,

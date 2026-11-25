@@ -15,10 +15,10 @@ Stack : Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · shadcn/ui · 
 
 Il n'y a ni compte ni base de données en ligne : **les données sont enregistrées dans le navigateur** (localStorage) de l'appareil utilisé.
 
-- Au premier lancement, l'app est remplie avec 20 prospects de démo (supprimables dans **Paramètres → Données de démo**).
+- L'app démarre vide, prête pour tes vrais prospects. Des données fictives peuvent être chargées pour une démo client dans **Paramètres → Données de démo**, puis supprimées en un clic.
 - Chaque navigateur / appareil a ses propres données : ce que tu saisis sur ton PC n'apparaît pas sur ton téléphone.
 - Vider les données du navigateur efface tout → utilise **Paramètres → Sauvegarde des données → Télécharger une sauvegarde** régulièrement. Le fichier `.json` se restaure en un clic, y compris sur un autre appareil.
-- L'adresse Vercel est publique, mais chaque visiteur ne voit que les données de son propre navigateur (au départ, la démo).
+- L'adresse Vercel est publique, mais chaque visiteur ne voit que les données de son propre navigateur (au départ, une app vide).
 
 ## Lancer en local
 

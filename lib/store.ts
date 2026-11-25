@@ -11,7 +11,7 @@ import type { Interaction, InteractionType, Prospect, Settings, Stage } from "@/
  * Aucune connexion ni serveur : tout reste sur l'appareil. Sauvegarde / restauration en JSON dans Paramètres.
  */
 export type AppData = {
-  version: 1;
+  version: number;
   prospects: Prospect[];
   interactions: Interaction[];
   settings: Settings;
@@ -32,7 +32,21 @@ function defaultSettings(): Settings {
 
 function freshData(withDemo: boolean): AppData {
   const demo = withDemo ? buildDemoData() : { prospects: [], interactions: [] };
-  return { version: 1, ...demo, settings: defaultSettings() };
+  return { version: DATA_VERSION, ...demo, settings: defaultSettings() };
+}
+
+/** v2 : l'app démarre vide ; les données de démo chargées automatiquement en v1 sont retirées. */
+const DATA_VERSION = 2;
+
+function migrate(data: AppData): AppData {
+  if (data.version >= DATA_VERSION) return data;
+  const demoIds = new Set(data.prospects.filter((p) => p.is_demo).map((p) => p.id));
+  return {
+    ...data,
+    version: DATA_VERSION,
+    prospects: data.prospects.filter((p) => !p.is_demo),
+    interactions: data.interactions.filter((i) => !demoIds.has(i.prospect_id)),
+  };
 }
 
 function isAppData(v: unknown): v is AppData {
@@ -52,12 +66,16 @@ function load(): AppData {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (isAppData(parsed)) return parsed;
+      if (isAppData(parsed)) {
+        const migrated = migrate(parsed);
+        if (migrated !== parsed) persist(migrated);
+        return migrated;
+      }
     }
   } catch {
     // stockage indisponible ou corrompu : on repart des données de démo
   }
-  const data = freshData(true);
+  const data = freshData(false);
   persist(data);
   return data;
 }
@@ -357,7 +375,8 @@ export async function restoreBackup(file: File): Promise<Result> {
   try {
     const parsed = JSON.parse(await file.text());
     if (!isAppData(parsed)) return { ok: false, error: "Ce fichier n'est pas une sauvegarde RonyIA." };
-    update(() => ({ ...parsed, version: 1 }));
+    // Une sauvegarde est restaurée telle quelle (démo incluse si elle en contenait).
+    update(() => ({ ...parsed, version: DATA_VERSION }));
     return { ok: true, value: undefined, message: `${parsed.prospects.length} prospects restaurés` };
   } catch {
     return { ok: false, error: "Fichier illisible." };
