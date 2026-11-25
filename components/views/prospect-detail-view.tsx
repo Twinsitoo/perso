@@ -46,11 +46,11 @@ export function ProspectDetailView({ id }: { id: string }) {
 
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="flex items-start gap-4">
-                <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-neutral-800 to-black text-xl font-bold text-white ring-1 ring-white/10 dark:from-neutral-700 dark:to-neutral-900">
+                <div className="grid size-11 shrink-0 place-items-center rounded-lg border bg-muted text-base font-semibold text-muted-foreground">
                   {p.company.slice(0, 1).toUpperCase()}
                 </div>
                 <div className="min-w-0 space-y-1.5">
-                  <h1 className="text-2xl font-semibold tracking-tight">{p.company}</h1>
+                  <h1 className="text-xl font-semibold tracking-tight">{p.company}</h1>
                   <p className="text-sm text-muted-foreground">
                     {[p.contact_name, p.job_title].filter(Boolean).join(" · ") || "Contact non renseigné"}
                   </p>
@@ -65,7 +65,7 @@ export function ProspectDetailView({ id }: { id: string }) {
             </div>
 
             {p.lost_reason && (
-              <div className="rounded-xl border border-zinc-500/20 bg-zinc-500/8 px-4 py-3 text-sm">
+              <div className="rounded-lg border px-4 py-3 text-[13px]">
                 <span className="font-medium">Raison de la perte :</span> {p.lost_reason}
               </div>
             )}

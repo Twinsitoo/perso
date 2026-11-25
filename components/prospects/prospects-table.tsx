@@ -266,7 +266,7 @@ export function ProspectsTable({ prospects, settings }: { prospects: Prospect[];
                     <td
                       className={cn(
                         "px-3 py-2.5 whitespace-nowrap tabular-nums",
-                        overdue ? "font-medium text-destructive" : dueToday ? "font-medium text-amber-600 dark:text-amber-400" : "text-muted-foreground",
+                        overdue ? "text-primary" : dueToday ? "font-medium text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {p.next_follow_up ? formatDate(p.next_follow_up) : "—"}

@@ -9,12 +9,12 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="grid size-8 place-items-center rounded-lg text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+      className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
       aria-label="Changer de thème"
       title="Mode clair / sombre"
     >
-      <Sun className="size-4 dark:hidden" />
-      <Moon className="hidden size-4 dark:block" />
+      <Sun className="size-3.5 dark:hidden" />
+      <Moon className="hidden size-3.5 dark:block" />
     </button>
   );
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Columns3, HardDrive, LayoutDashboard, Settings, Users } from "lucide-react";
+import { CalendarDays, Columns3, LayoutDashboard, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
@@ -18,7 +18,7 @@ export const NAV_ITEMS = [
 export function NavLinks({ onNavigate, overdueCount = 0 }: { onNavigate?: () => void; overdueCount?: number }) {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-col gap-0.5">
+    <nav className="flex flex-col gap-px">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (
@@ -27,17 +27,16 @@ export function NavLinks({ onNavigate, overdueCount = 0 }: { onNavigate?: () => 
             href={href}
             onClick={onNavigate}
             className={cn(
-              "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors",
               active
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
             )}
           >
-            {active && <span className="absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full bg-sidebar-primary" />}
-            <Icon className={cn("size-4", active && "text-sidebar-primary")} />
+            <Icon className="size-4" strokeWidth={1.75} />
             {label}
             {href === "/agenda" && overdueCount > 0 && (
-              <span className="ml-auto rounded-full bg-sidebar-primary px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white">
+              <span className="ml-auto text-[11px] font-medium text-primary tabular-nums" title="Relances en retard">
                 {overdueCount}
               </span>
             )}
@@ -50,14 +49,13 @@ export function NavLinks({ onNavigate, overdueCount = 0 }: { onNavigate?: () => 
 
 export function SidebarFooter() {
   return (
-    <div className="flex items-center justify-between gap-2 border-t border-sidebar-border px-1 pt-3">
+    <div className="flex items-center justify-between gap-2 px-1">
       <Link
         href="/parametres#sauvegarde"
-        className="flex min-w-0 items-center gap-2 text-xs text-sidebar-foreground/55 hover:text-sidebar-foreground"
+        className="truncate text-[11px] text-muted-foreground hover:text-foreground"
         title="Données enregistrées dans ce navigateur. Sauvegarde dans Paramètres."
       >
-        <HardDrive className="size-3.5 shrink-0" />
-        <span className="truncate">Données sur cet appareil</span>
+        Données locales · Sauvegarde
       </Link>
       <ThemeToggle />
     </div>
@@ -66,8 +64,8 @@ export function SidebarFooter() {
 
 export function Sidebar({ overdueCount }: { overdueCount: number }) {
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-6 bg-sidebar p-3 text-sidebar-foreground md:flex">
-      <Logo className="px-2 pt-2" />
+    <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col gap-5 border-r border-sidebar-border bg-sidebar px-3 py-4 text-sidebar-foreground md:flex">
+      <Logo className="px-1.5" />
       <NavLinks overdueCount={overdueCount} />
       <div className="mt-auto">
         <SidebarFooter />

@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar overdueCount={overdue} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileNav overdueCount={overdue} />
-        <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-6 md:px-10 md:py-10">{children}</main>
       </div>
     </div>
   );

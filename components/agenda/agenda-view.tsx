@@ -34,12 +34,12 @@ function EventPill({ e, compact = false }: { e: AgendaEvent; compact?: boolean }
       href={`/prospects/${e.prospectId}`}
       title={`${e.kind === "call" ? "Call" : "Relance"} · ${e.company}`}
       className={cn(
-        "flex items-center gap-1 truncate rounded-md px-1.5 py-0.5 text-[11px] font-medium transition-opacity hover:opacity-80",
+        "flex items-center gap-1 truncate rounded border-l-2 bg-muted/60 px-1.5 py-0.5 text-[11px] transition-colors hover:bg-muted",
         e.overdue
-          ? "bg-destructive text-white"
+          ? "border-primary text-primary"
           : e.kind === "call"
-            ? "bg-amber-500/15 text-amber-800 dark:text-amber-300"
-            : "bg-primary/10 text-primary",
+            ? "border-foreground/60 text-foreground"
+            : "border-muted-foreground/40 text-foreground/80",
       )}
     >
       <Icon className="size-3 shrink-0" />
@@ -189,9 +189,9 @@ export function AgendaView({ prospects, stages }: { prospects: Prospect[]; stage
       </Card>
 
       <div className="space-y-6">
-        <Card className={cn(overdue.length > 0 && "ring-destructive/40")}>
+        <Card>
           <CardHeader>
-            <CardTitle className={cn("flex items-center gap-2", overdue.length > 0 && "text-destructive")}>
+            <CardTitle className={cn("flex items-center gap-2", overdue.length > 0 && "text-primary")}>
               <AlertTriangle className="size-4" />
               En retard ({overdue.length})
             </CardTitle>
@@ -203,12 +203,12 @@ export function AgendaView({ prospects, stages }: { prospects: Prospect[]; stage
               <Link
                 key={e.id}
                 href={`/prospects/${e.prospectId}`}
-                className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-destructive/8"
+                className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-accent"
               >
                 <span className="truncate font-medium">
                   {e.kind === "call" ? "Call" : "Relance"} · {e.company}
                 </span>
-                <span className="shrink-0 text-xs font-medium text-destructive">{formatDate(e.date)}</span>
+                <span className="shrink-0 text-xs text-primary tabular-nums">{formatDate(e.date)}</span>
               </Link>
             ))}
           </CardContent>
@@ -225,12 +225,12 @@ export function AgendaView({ prospects, stages }: { prospects: Prospect[]; stage
               <Link
                 key={e.id}
                 href={`/prospects/${e.prospectId}`}
-                className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-muted/60"
+                className="flex items-center gap-3 rounded-md px-2 py-1.5 text-[13px] hover:bg-accent"
               >
                 {e.kind === "call" ? (
-                  <CalendarClock className="size-4 shrink-0 text-amber-500" />
+                  <CalendarClock className="size-3.5 shrink-0 text-muted-foreground" />
                 ) : (
-                  <BellRing className="size-4 shrink-0 text-primary" />
+                  <BellRing className="size-3.5 shrink-0 text-muted-foreground" />
                 )}
                 <span className="min-w-0 flex-1 truncate">{e.company}</span>
                 <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
@@ -244,13 +244,13 @@ export function AgendaView({ prospects, stages }: { prospects: Prospect[]; stage
 
         <div className="flex flex-wrap gap-3 px-1 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-primary/30" /> Relance
+            <span className="h-3 w-0.5 rounded bg-muted-foreground/40" /> Relance
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-amber-500/40" /> Call / démo
+            <span className="h-3 w-0.5 rounded bg-foreground/60" /> Call / démo
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-destructive" /> En retard
+            <span className="h-3 w-0.5 rounded bg-primary" /> En retard
           </span>
         </div>
       </div>

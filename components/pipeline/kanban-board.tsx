@@ -16,7 +16,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { BellRing, CalendarClock, GripVertical, Plus, User } from "lucide-react";
+import { Plus } from "lucide-react";
 import { LostDialog } from "@/components/prospects/lost-dialog";
 import { PriorityBadge } from "@/components/prospects/badges";
 import { stageColor } from "@/lib/constants";
@@ -32,51 +32,31 @@ function ProspectCard({ prospect, stageType, overlay = false }: { prospect: Pros
   return (
     <div
       className={cn(
-        "group rounded-xl border bg-card p-3 text-left shadow-xs transition-shadow",
-        overlay ? "rotate-2 shadow-xl ring-2 ring-primary/40" : "hover:shadow-md",
-        overdue && "border-destructive/40",
+        "rounded-md border bg-card px-3 py-2.5 text-left transition-colors",
+        overlay ? "shadow-lg" : "hover:border-foreground/20",
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <Link
-          href={`/prospects/${prospect.id}`}
-          className="line-clamp-2 text-sm leading-snug font-semibold hover:text-primary"
-          onClick={(e) => overlay && e.preventDefault()}
-        >
-          {prospect.company}
-        </Link>
-        <GripVertical className="size-4 shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground" />
-      </div>
-      {prospect.contact_name && (
-        <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
-          <User className="size-3" />
-          {prospect.contact_name}
-        </p>
-      )}
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="text-sm font-semibold tabular-nums">{formatEUR(prospect.estimated_amount)}</span>
+      <Link
+        href={`/prospects/${prospect.id}`}
+        className="line-clamp-2 text-[13px] leading-snug font-medium"
+        onClick={(e) => overlay && e.preventDefault()}
+      >
+        {prospect.company}
+      </Link>
+      {prospect.contact_name && <p className="mt-0.5 truncate text-xs text-muted-foreground">{prospect.contact_name}</p>}
+      <div className="mt-2.5 flex items-center justify-between gap-2">
+        <span className="text-[13px] tabular-nums">{formatEUR(prospect.estimated_amount)}</span>
         <PriorityBadge priority={prospect.priority} />
       </div>
       {(prospect.next_follow_up || prospect.next_call_at) && stageType === "open" && (
-        <div className="mt-2.5 space-y-1 border-t pt-2.5 text-xs">
+        <div className="mt-2 space-y-0.5 text-[11px] tabular-nums">
           {prospect.next_follow_up && (
-            <p
-              className={cn(
-                "flex items-center gap-1.5",
-                overdue ? "font-medium text-destructive" : dueToday ? "font-medium text-amber-600 dark:text-amber-400" : "text-muted-foreground",
-              )}
-            >
-              <BellRing className="size-3" />
-              Relance {overdue ? "en retard · " : ""}
-              {formatDate(prospect.next_follow_up)}
+            <p className={cn(overdue ? "text-primary" : dueToday ? "text-foreground" : "text-muted-foreground")}>
+              Relance {formatDate(prospect.next_follow_up)}
+              {overdue ? " · en retard" : dueToday ? " · aujourd'hui" : ""}
             </p>
           )}
-          {prospect.next_call_at && (
-            <p className="flex items-center gap-1.5 text-muted-foreground">
-              <CalendarClock className="size-3" />
-              {formatDateTime(prospect.next_call_at)}
-            </p>
-          )}
+          {prospect.next_call_at && <p className="text-muted-foreground">Call {formatDateTime(prospect.next_call_at)}</p>}
         </div>
       )}
     </div>
@@ -102,36 +82,32 @@ function Column({ stage, prospects, isFirst }: { stage: Stage; prospects: Prospe
   const total = prospects.reduce((s, p) => s + p.estimated_amount, 0);
   const color = stageColor(stage.color);
   return (
-    <div className="flex w-[280px] shrink-0 flex-col">
-      <div className="mb-2 px-1">
-        <div className="flex items-center gap-2">
-          <span className={cn("size-2 rounded-full", color.dot)} />
-          <h2 className="truncate text-sm font-semibold">{stage.label}</h2>
-          <span className="rounded-full bg-muted px-1.5 text-xs text-muted-foreground tabular-nums">{prospects.length}</span>
-        </div>
-        <p className="mt-0.5 pl-4 text-xs font-medium text-muted-foreground tabular-nums" title={formatEUR(total)}>
+    <div className="flex w-[264px] shrink-0 flex-col">
+      <div className="mb-2 flex items-center gap-2 px-1 text-xs">
+        <span className={cn("size-1.5 rounded-full", color.dot)} />
+        <h2 className="truncate font-medium">{stage.label}</h2>
+        <span className="text-muted-foreground tabular-nums">{prospects.length}</span>
+        <span className="ml-auto text-muted-foreground tabular-nums" title={formatEUR(total)}>
           {formatEURCompact(total)}
-        </p>
+        </span>
       </div>
       <div
         ref={setNodeRef}
         className={cn(
-          "flex min-h-40 flex-1 flex-col gap-2 rounded-2xl border border-transparent bg-muted/50 p-2 transition-colors",
-          isOver && "border-primary/40 bg-primary/5",
+          "flex min-h-40 flex-1 flex-col gap-1.5 rounded-lg bg-muted/40 p-1.5 transition-colors",
+          isOver && "bg-muted ring-1 ring-foreground/15",
         )}
       >
         {prospects.map((p) => (
           <DraggableCard key={p.id} prospect={p} stageType={stage.type} />
         ))}
         {prospects.length === 0 && (
-          <div className="grid flex-1 place-items-center rounded-xl border border-dashed py-8 text-xs text-muted-foreground">
-            Glisse un prospect ici
-          </div>
+          <div className="grid flex-1 place-items-center py-8 text-[11px] text-muted-foreground/70">Vide</div>
         )}
         {isFirst && (
           <Link
             href="/prospects/nouveau"
-            className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs text-muted-foreground hover:bg-background hover:text-foreground"
+            className="flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs text-muted-foreground hover:bg-background hover:text-foreground"
           >
             <Plus className="size-3.5" />
             Ajouter
@@ -207,7 +183,7 @@ export function KanbanBoard({ prospects, stages }: { prospects: Prospect[]; stag
         </div>
         <DragOverlay dropAnimation={null}>
           {active ? (
-            <div className="w-[264px]">
+            <div className="w-[252px]">
               <ProspectCard
                 prospect={active}
                 stageType={stages.find((s) => s.key === active.stage)?.type ?? "open"}

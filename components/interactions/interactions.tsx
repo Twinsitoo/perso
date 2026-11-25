@@ -18,10 +18,10 @@ import type { Interaction, InteractionType } from "@/types/database";
 
 const ICONS = { call: Phone, email: Mail, linkedin: Linkedin, rdv: CalendarCheck } as const;
 const COLORS = {
-  call: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
-  email: "bg-sky-500/12 text-sky-600 dark:text-sky-400",
-  linkedin: "bg-blue-600/12 text-blue-700 dark:text-blue-400",
-  rdv: "bg-red-600/12 text-red-600 dark:text-red-400",
+  call: "",
+  email: "",
+  linkedin: "",
+  rdv: "",
 } as const;
 
 export function Interactions({ prospectId, interactions }: { prospectId: string; interactions: Interaction[] }) {
@@ -90,12 +90,12 @@ export function Interactions({ prospectId, interactions }: { prospectId: string;
               const Icon = ICONS[i.type] ?? Phone;
               return (
                 <li key={i.id} className="group relative flex gap-3">
-                  <div className={cn("relative z-10 grid size-8 shrink-0 place-items-center rounded-full ring-4 ring-card", COLORS[i.type])}>
+                  <div className={cn("relative z-10 grid size-8 shrink-0 place-items-center rounded-full border bg-card text-muted-foreground", COLORS[i.type])}>
                     <Icon className="size-3.5" />
                   </div>
                   <div className="min-w-0 flex-1 pt-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{interactionLabel(i.type)}</span>
+                      <span className="text-[13px] font-medium">{interactionLabel(i.type)}</span>
                       <span className="text-xs text-muted-foreground">{formatDateTime(i.occurred_at)}</span>
                       <button
                         type="button"

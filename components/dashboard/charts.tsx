@@ -1,7 +1,6 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { stageColor } from "@/lib/constants";
 import { formatEUR, formatEURCompact, monthLabel } from "@/lib/format";
 
 type TooltipPayload = { value: number; payload: Record<string, unknown> }[];
@@ -20,7 +19,7 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
-    <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md">
+    <div className="rounded-md border bg-popover px-2.5 py-1.5 text-xs shadow-sm">
       <p className="font-medium">{title(row)}</p>
       <div className="mt-0.5 text-muted-foreground">{format(row)}</div>
     </div>
@@ -37,17 +36,16 @@ const axisProps = {
 export function StageChart({
   data,
 }: {
-  data: { key: string; label: string; color: string; count: number; amount: number }[];
+  data: { key: string; label: string; type: string; count: number; amount: number }[];
 }) {
   return (
-    <div className="h-[300px] w-full">
+    <div className="h-[280px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 28, bottom: 4, left: 4 }} barCategoryGap={6}>
-          <CartesianGrid horizontal={false} stroke="var(--border)" strokeDasharray="3 3" />
-          <XAxis type="number" allowDecimals={false} {...axisProps} />
-          <YAxis type="category" dataKey="label" width={118} {...axisProps} tick={{ ...axisProps.tick, fill: "var(--foreground)" }} />
+        <BarChart data={data} layout="vertical" margin={{ top: 0, right: 24, bottom: 0, left: 0 }} barCategoryGap={8}>
+          <XAxis type="number" allowDecimals={false} hide />
+          <YAxis type="category" dataKey="label" width={112} {...axisProps} />
           <Tooltip
-            cursor={{ fill: "var(--muted)", opacity: 0.6 }}
+            cursor={{ fill: "var(--muted)", opacity: 0.5 }}
             content={(p) => (
               <ChartTooltip
                 active={p.active}
@@ -63,12 +61,15 @@ export function StageChart({
           />
           <Bar
             dataKey="count"
-            radius={[0, 4, 4, 0]}
-            maxBarSize={22}
+            radius={[0, 3, 3, 0]}
+            maxBarSize={14}
             label={{ position: "right", fill: "var(--muted-foreground)", fontSize: 11 }}
           >
             {data.map((d) => (
-              <Cell key={d.key} fill={stageColor(d.color).hex} />
+              <Cell
+                key={d.key}
+                fill={d.type === "won" ? "var(--chart-1)" : d.type === "lost" ? "var(--chart-4)" : "var(--chart-3)"}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -90,11 +91,11 @@ export function MonthlyCharts({ data }: { data: { key: string; deals: number; re
         <div className="h-[170px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={rows} margin={{ top: 8, right: 4, bottom: 0, left: 4 }}>
-              <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+              <CartesianGrid vertical={false} stroke="var(--border)" />
               <XAxis dataKey="label" {...axisProps} interval="preserveStartEnd" minTickGap={8} />
               <YAxis width={48} {...axisProps} tickFormatter={(v) => formatEURCompact(v)} />
               <Tooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.6 }}
+                cursor={{ fill: "var(--muted)", opacity: 0.5 }}
                 content={(p) => (
                   <ChartTooltip
                     active={p.active}
@@ -108,7 +109,7 @@ export function MonthlyCharts({ data }: { data: { key: string; deals: number; re
                   />
                 )}
               />
-              <Bar dataKey="revenue" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={28} />
+              <Bar dataKey="revenue" fill="var(--chart-1)" radius={[3, 3, 0, 0]} maxBarSize={18} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -118,11 +119,11 @@ export function MonthlyCharts({ data }: { data: { key: string; deals: number; re
         <div className="h-[120px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={rows} margin={{ top: 8, right: 4, bottom: 0, left: 4 }}>
-              <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+              <CartesianGrid vertical={false} stroke="var(--border)" />
               <XAxis dataKey="label" {...axisProps} interval="preserveStartEnd" minTickGap={8} />
               <YAxis width={48} allowDecimals={false} {...axisProps} />
               <Tooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.6 }}
+                cursor={{ fill: "var(--muted)", opacity: 0.5 }}
                 content={(p) => (
                   <ChartTooltip
                     active={p.active}
@@ -136,7 +137,7 @@ export function MonthlyCharts({ data }: { data: { key: string; deals: number; re
                   />
                 )}
               />
-              <Bar dataKey="deals" fill="var(--chart-2)" radius={[4, 4, 0, 0]} maxBarSize={28} />
+              <Bar dataKey="deals" fill="var(--chart-3)" radius={[3, 3, 0, 0]} maxBarSize={18} />
             </BarChart>
           </ResponsiveContainer>
         </div>
