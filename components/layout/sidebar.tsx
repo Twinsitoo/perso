@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Columns3, LayoutDashboard, LogOut, Settings, Users } from "lucide-react";
+import { CalendarDays, Columns3, HardDrive, LayoutDashboard, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signOut } from "@/lib/actions/auth";
 import { Logo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -49,38 +48,29 @@ export function NavLinks({ onNavigate, overdueCount = 0 }: { onNavigate?: () => 
   );
 }
 
-export function SidebarFooter({ email }: { email: string }) {
+export function SidebarFooter() {
   return (
-    <div className="space-y-2 border-t border-sidebar-border pt-3">
-      <div className="flex items-center justify-between gap-2 px-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <div className="grid size-7 shrink-0 place-items-center rounded-full bg-sidebar-accent text-xs font-semibold uppercase">
-            {email.slice(0, 1)}
-          </div>
-          <span className="truncate text-xs text-sidebar-foreground/70">{email}</span>
-        </div>
-        <ThemeToggle />
-      </div>
-      <form action={signOut}>
-        <button
-          type="submit"
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-        >
-          <LogOut className="size-4" />
-          Déconnexion
-        </button>
-      </form>
+    <div className="flex items-center justify-between gap-2 border-t border-sidebar-border px-1 pt-3">
+      <Link
+        href="/parametres#sauvegarde"
+        className="flex min-w-0 items-center gap-2 text-xs text-sidebar-foreground/55 hover:text-sidebar-foreground"
+        title="Données enregistrées dans ce navigateur. Sauvegarde dans Paramètres."
+      >
+        <HardDrive className="size-3.5 shrink-0" />
+        <span className="truncate">Données sur cet appareil</span>
+      </Link>
+      <ThemeToggle />
     </div>
   );
 }
 
-export function Sidebar({ email, overdueCount }: { email: string; overdueCount: number }) {
+export function Sidebar({ overdueCount }: { overdueCount: number }) {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-6 bg-sidebar p-3 text-sidebar-foreground md:flex">
       <Logo className="px-2 pt-2" />
       <NavLinks overdueCount={overdueCount} />
       <div className="mt-auto">
-        <SidebarFooter email={email} />
+        <SidebarFooter />
       </div>
     </aside>
   );

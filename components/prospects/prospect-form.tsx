@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +13,8 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { PRIORITIES } from "@/lib/constants";
 import { isoToParisLocal } from "@/lib/format";
-import { saveProspect, type FormState } from "@/lib/actions/prospects";
+import { saveProspect } from "@/lib/store";
+import { fieldErrors, prospectSchema } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import type { Prospect, Settings } from "@/types/database";
 
@@ -38,7 +41,9 @@ function Field({
 }
 
 export function ProspectForm({ prospect, settings }: { prospect?: Prospect; settings: Settings }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(saveProspect, undefined);
+  const router = useRouter();
+  const [state, setState] = useState<{ error?: string; fieldErrors?: Record<string, string> }>();
+  const [pending, setPending] = useState(false);
   const fe = state?.fieldErrors ?? {};
   const p = prospect;
   const sources = p?.source && !settings.sources.includes(p.source) ? [...settings.sources, p.source] : settings.sources;
@@ -47,10 +52,16 @@ export function ProspectForm({ prospect, settings }: { prospect?: Prospect; sett
     <form
       className="space-y-6"
       onSubmit={(e) => {
-        // Soumission manuelle : évite la remise à zéro automatique du formulaire en cas d'erreur.
         e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        startTransition(() => action(fd));
+        const parsed = prospectSchema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
+        if (!parsed.success) {
+          setState({ error: "Certains champs sont à corriger.", fieldErrors: fieldErrors(parsed.error) });
+          return;
+        }
+        setPending(true);
+        const id = saveProspect(parsed.data, p?.id);
+        toast.success(p ? "Prospect mis à jour" : "Prospect créé");
+        router.push(`/prospects/${id}`);
       }}
     >
       {p && <input type="hidden" name="id" value={p.id} />}

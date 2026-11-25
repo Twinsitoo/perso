@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { Logo } from "./logo";
 import { NavLinks, SidebarFooter } from "./sidebar";
 
-export function MobileNav({ email, overdueCount }: { email: string; overdueCount: number }) {
+export function MobileNav({ overdueCount }: { overdueCount: number }) {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between bg-sidebar px-4 text-sidebar-foreground md:hidden">
@@ -23,7 +23,7 @@ export function MobileNav({ email, overdueCount }: { email: string; overdueCount
           <Logo className="px-2 pt-2" />
           <NavLinks onNavigate={() => setOpen(false)} overdueCount={overdueCount} />
           <div className="mt-auto">
-            <SidebarFooter email={email} />
+            <SidebarFooter />
           </div>
         </SheetContent>
       </Sheet>

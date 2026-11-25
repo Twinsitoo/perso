@@ -21,7 +21,7 @@ import { LostDialog } from "@/components/prospects/lost-dialog";
 import { PriorityBadge } from "@/components/prospects/badges";
 import { stageColor } from "@/lib/constants";
 import { formatDate, formatDateTime, formatEUR, formatEURCompact, todayYMD } from "@/lib/format";
-import { updateStage } from "@/lib/actions/prospects";
+import { updateStage } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import type { Prospect, Stage } from "@/types/database";
 
@@ -143,16 +143,9 @@ function Column({ stage, prospects, isFirst }: { stage: Stage; prospects: Prospe
 }
 
 export function KanbanBoard({ prospects, stages }: { prospects: Prospect[]; stages: Stage[] }) {
-  const [items, setItems] = useState(prospects);
+  const items = prospects;
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pendingLost, setPendingLost] = useState<Prospect | null>(null);
-
-  // Resynchronise l'état local quand le serveur renvoie de nouvelles données.
-  const [source, setSource] = useState(prospects);
-  if (source !== prospects) {
-    setSource(prospects);
-    setItems(prospects);
-  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -180,19 +173,10 @@ export function KanbanBoard({ prospects, stages }: { prospects: Prospect[]; stag
   const active = activeId ? items.find((p) => p.id === activeId) : null;
   const lostStage = stages.find((s) => s.type === "lost");
 
-  async function move(prospect: Prospect, stage: string, lostReason?: string) {
-    const previous = items;
-    setItems((list) =>
-      list.map((p) => (p.id === prospect.id ? { ...p, stage, lost_reason: lostReason ?? p.lost_reason } : p)),
-    );
-    const res = await updateStage(prospect.id, stage, lostReason);
-    if (!res.ok) {
-      setItems(previous);
-      toast.error(`Impossible de déplacer : ${res.error}`);
-    } else {
-      const label = stages.find((s) => s.key === stage)?.label ?? stage;
-      toast.success(`${prospect.company} → ${label}`);
-    }
+  function move(prospect: Prospect, stage: string, lostReason?: string) {
+    updateStage(prospect.id, stage, lostReason);
+    const label = stages.find((s) => s.key === stage)?.label ?? stage;
+    toast.success(`${prospect.company} → ${label}`);
   }
 
   function onDragStart(e: DragStartEvent) {
@@ -208,7 +192,7 @@ export function KanbanBoard({ prospects, stages }: { prospects: Prospect[]; stag
       setPendingLost(prospect);
       return;
     }
-    void move(prospect, target);
+    move(prospect, target);
   }
 
   return (
@@ -242,7 +226,7 @@ export function KanbanBoard({ prospects, stages }: { prospects: Prospect[]; stag
           if (pendingLost && lostStage) {
             const p = pendingLost;
             setPendingLost(null);
-            await move(p, lostStage.key, reason);
+            move(p, lostStage.key, reason);
           }
         }}
       />

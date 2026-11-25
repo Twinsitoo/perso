@@ -11,7 +11,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { PRIORITIES } from "@/lib/constants";
 import { exportProspectsCSV, parseProspectsCSV } from "@/lib/csv";
 import { formatDate, formatEUR, todayYMD } from "@/lib/format";
-import { importProspects } from "@/lib/actions/prospects";
+import { importProspects } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import type { Prospect, Settings } from "@/types/database";
 import { PriorityBadge, StageBadge } from "./badges";
@@ -128,10 +128,10 @@ export function ProspectsTable({ prospects, settings }: { prospects: Prospect[];
     startImport(async () => {
       try {
         const parsed = await parseProspectsCSV(file, settings.stages);
-        const res = await importProspects(parsed);
+        const res = importProspects(parsed);
         if (res.ok) {
-          toast.success(`${res.count} prospect(s) importé(s)${res.skipped ? `, ${res.skipped} ligne(s) ignorée(s)` : ""}`);
-          router.refresh();
+          const { count, skipped } = res.value;
+          toast.success(`${count} prospect(s) importé(s)${skipped ? `, ${skipped} ligne(s) ignorée(s)` : ""}`);
         } else toast.error(res.error);
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Import impossible");

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Ban, Mail, MoreHorizontal, Pencil, Phone, RotateCcw, Trash2 } from "lucide-react";
 import { LinkedinIcon as Linkedin } from "@/components/ui/linkedin-icon";
@@ -22,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NativeSelect } from "@/components/ui/native-select";
-import { deleteProspect, updateStage } from "@/lib/actions/prospects";
+import { deleteProspect, updateStage } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import type { Prospect, Stage } from "@/types/database";
 import { LostDialog } from "./lost-dialog";
@@ -62,7 +63,8 @@ function QuickLink({
 export function ProspectActions({ prospect, stages }: { prospect: Prospect; stages: Stage[] }) {
   const [lostOpen, setLostOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const pending = false;
   const lostStage = stages.find((s) => s.type === "lost");
   const firstStage = stages[0];
   const isLost = prospect.stage === lostStage?.key;
@@ -72,11 +74,8 @@ export function ProspectActions({ prospect, stages }: { prospect: Prospect; stag
       setLostOpen(true);
       return;
     }
-    startTransition(async () => {
-      const res = await updateStage(prospect.id, stage);
-      if (res.ok) toast.success("Étape mise à jour");
-      else toast.error(res.error);
-    });
+    updateStage(prospect.id, stage);
+    toast.success("Étape mise à jour");
   }
 
   return (
@@ -134,11 +133,9 @@ export function ProspectActions({ prospect, stages }: { prospect: Prospect; stag
         company={prospect.company}
         onConfirm={async (reason) => {
           if (!lostStage) return;
-          const res = await updateStage(prospect.id, lostStage.key, reason);
-          if (res.ok) {
-            toast.success("Prospect marqué comme perdu");
-            setLostOpen(false);
-          } else toast.error(res.error);
+          updateStage(prospect.id, lostStage.key, reason);
+          toast.success("Prospect marqué comme perdu");
+          setLostOpen(false);
         }}
       />
 
@@ -157,12 +154,11 @@ export function ProspectActions({ prospect, stages }: { prospect: Prospect; stag
             <Button
               className="bg-destructive text-white hover:bg-destructive/90"
               disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  const res = await deleteProspect(prospect.id);
-                  if (res && !res.ok) toast.error(res.error);
-                })
-              }
+              onClick={() => {
+                router.push("/prospects");
+                deleteProspect(prospect.id);
+                toast.success(`${prospect.company} supprimé`);
+              }}
             >
               Supprimer définitivement
             </Button>

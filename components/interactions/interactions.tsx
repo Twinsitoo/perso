@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useTransition } from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { CalendarCheck, Loader2, Mail, Phone, Plus, Trash2 } from "lucide-react";
 import { LinkedinIcon as Linkedin } from "@/components/ui/linkedin-icon";
@@ -11,10 +11,10 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { INTERACTION_TYPES, interactionLabel } from "@/lib/constants";
-import { formatDateTime, isoToParisLocal } from "@/lib/format";
-import { addInteraction, deleteInteraction, type FormState } from "@/lib/actions/prospects";
+import { formatDateTime, isoToParisLocal, parisLocalToISO } from "@/lib/format";
+import { addInteraction, deleteInteraction } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import type { Interaction } from "@/types/database";
+import type { Interaction, InteractionType } from "@/types/database";
 
 const ICONS = { call: Phone, email: Mail, linkedin: Linkedin, rdv: CalendarCheck } as const;
 const COLORS = {
@@ -25,19 +25,19 @@ const COLORS = {
 } as const;
 
 export function Interactions({ prospectId, interactions }: { prospectId: string; interactions: Interaction[] }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(addInteraction, undefined);
-  const [deleting, startTransition] = useTransition();
+  const pending = false;
+  const deleting = false;
   const formRef = useRef<HTMLFormElement>(null);
-  const lastCount = useRef(interactions.length);
 
-  useEffect(() => {
-    if (interactions.length > lastCount.current) toast.success("Interaction ajoutée");
-    lastCount.current = interactions.length;
-  }, [interactions.length]);
-
-  useEffect(() => {
-    if (state?.error) toast.error(state.error);
-  }, [state]);
+  function action(fd: FormData) {
+    const type = String(fd.get("type") ?? "call") as InteractionType;
+    const occurred = parisLocalToISO(String(fd.get("occurred_at") ?? "")) ?? new Date().toISOString();
+    const notes = String(fd.get("notes") ?? "").trim() || null;
+    const next = String(fd.get("next_follow_up") ?? "") || null;
+    addInteraction({ prospect_id: prospectId, type, occurred_at: occurred, notes, next_follow_up: next });
+    toast.success("Interaction ajoutée");
+    formRef.current?.reset();
+  }
 
   return (
     <Card>
@@ -100,12 +100,7 @@ export function Interactions({ prospectId, interactions }: { prospectId: string;
                       <button
                         type="button"
                         disabled={deleting}
-                        onClick={() =>
-                          startTransition(async () => {
-                            const res = await deleteInteraction(i.id);
-                            if (!res.ok) toast.error(res.error);
-                          })
-                        }
+                        onClick={() => deleteInteraction(i.id)}
                         className="ml-auto rounded p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive focus:opacity-100"
                         aria-label="Supprimer l'interaction"
                       >

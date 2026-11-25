@@ -1,15 +1,44 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Database, Loader2, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Database,
+  Download,
+  HardDrive,
+  Loader2,
+  Plus,
+  RotateCcw,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { DEFAULT_SOURCES, DEFAULT_STAGES, STAGE_COLORS, stageColor } from "@/lib/constants";
-import { clearDemoData, loadDemoData, saveGoals, saveSources, saveStages } from "@/lib/actions/settings";
+import {
+  clearDemoData,
+  exportBackup,
+  loadDemoData,
+  resetAll,
+  restoreBackup,
+  saveGoals,
+  saveSources,
+  saveStages,
+} from "@/lib/store";
 import { cn } from "@/lib/utils";
 import type { Settings, Stage } from "@/types/database";
 
@@ -28,9 +57,11 @@ function slugify(label: string, existing: string[]) {
   return key;
 }
 
+type RunResult = { ok: boolean; error?: string; message?: string };
+
 function useAction() {
   const [pending, start] = useTransition();
-  function run(fn: () => Promise<{ ok: boolean; error?: string; message?: string }>, success: string) {
+  function run(fn: () => RunResult | Promise<RunResult>, success: string) {
     start(async () => {
       const res = await fn();
       if (res.ok) toast.success(res.message ?? success);
@@ -303,6 +334,79 @@ export function DemoDataCard({ demoCount }: { demoCount: number }) {
           {demoCount > 0 ? `${demoCount} prospects de démo présents` : "Aucune donnée de démo"}
         </span>
       </CardContent>
+    </Card>
+  );
+}
+
+export function BackupCard({ total }: { total: number }) {
+  const { pending, run } = useAction();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [resetOpen, setResetOpen] = useState(false);
+
+  return (
+    <Card id="sauvegarde" className="scroll-mt-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <HardDrive className="size-4 text-primary" />
+          Sauvegarde des données
+        </CardTitle>
+        <CardDescription>
+          Tes données sont enregistrées dans ce navigateur, sur cet appareil ({total} prospects). Télécharge une sauvegarde
+          régulièrement : elle te permet de les restaurer ou de les transférer sur un autre ordinateur.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-wrap items-center gap-2">
+        <Button onClick={() => exportBackup()}>
+          <Download />
+          Télécharger une sauvegarde
+        </Button>
+        <Button variant="outline" disabled={pending} onClick={() => fileRef.current?.click()}>
+          {pending ? <Loader2 className="animate-spin" /> : <Upload />}
+          Restaurer
+        </Button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) run(() => restoreBackup(file), "Sauvegarde restaurée");
+            e.target.value = "";
+          }}
+        />
+        <Button variant="ghost" className="hover:text-destructive" onClick={() => setResetOpen(true)}>
+          <RotateCcw />
+          Tout effacer
+        </Button>
+      </CardContent>
+
+      <Dialog open={resetOpen} onOpenChange={(o) => setResetOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tout effacer ?</DialogTitle>
+            <DialogDescription>
+              Tous les prospects, interactions et réglages de ce navigateur seront supprimés. Télécharge une sauvegarde avant si
+              tu veux pouvoir revenir en arrière.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetOpen(false)}>
+              Annuler
+            </Button>
+            <Button
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={() => {
+                resetAll(false);
+                setResetOpen(false);
+                toast.success("Données effacées");
+              }}
+            >
+              Effacer définitivement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
